@@ -3,7 +3,7 @@
   "bot-account": {
     "username": "AFK-Aternos-Bot",
     "password": "",
-    "type": "offline"
+    "type": "online"
   },
   "server": {
     "ip": "peakkittichock-nUyF.aternos.me",
