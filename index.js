@@ -1355,11 +1355,20 @@ function createBot() {
       scheduleReconnect();
     });
 
-    bot.on("error", (err) => {
-      const msg = err.message || "";
-      addLog(`[Bot] Error: ${msg}`);
-      botState.errors.push({ type: "error", message: msg, time: Date.now() });
-      // Don't reconnect on error - let 'end' event handle it
+    bot.on('error', (err) => {
+      const msg = String(err.message);
+      addLog(`[Socket Error] Bot detected Network error: ${msg}`);
+      
+      botState.errors.push({ type: "socket_error", message: msg, time: Date.now() });
+    
+      if ((msg.includes('ECONNRESET') || msg.includes('EPIPE') || msg.includes('write')) && !isReconnecting) {
+        addLog("[Socket Error] A data transmission interruption was detected. — preparing restart...");
+        botState.connected = false;
+        clearAllIntervals();
+        try { bot.end(); } catch (_) {}
+        bot = null;
+        scheduleReconnect();
+      }
     });
   } catch (err) {
     addLog(`[Bot] Failed to create bot: ${err.message}`);
